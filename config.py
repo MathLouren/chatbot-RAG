@@ -3,7 +3,9 @@ MONGO_URI   = "mongodb://localhost:27017"
 DB_NAME     = "eprodutos"
 
 # ── ChromaDB local (pasta no disco) ──────────────────────────────────
-CHROMA_HOST       = "./chroma_db"          # ← NOVO (era CHROMA_HOST + CHROMA_PORT)
+# config.py corrigido
+CHROMA_HOST = "localhost"
+CHROMA_PORT = 8000        # ← NOVO (era CHROMA_HOST + CHROMA_PORT)
 COLLECTION_NAME   = "eprodutos"
 
 EMBED_MODEL       = "qwen3-embedding:8b"
