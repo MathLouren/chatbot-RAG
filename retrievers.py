@@ -30,6 +30,42 @@ _mongo = MongoClient(MONGO_URI)
 _db = _mongo[DB_NAME]
 _valid_processes = ["Lista Diária Ingram Micro ES - Preço", "Estoque Geral Coletek"]
 
+# Adicione esta constante no topo do seu retrievers.py, abaixo dos imports
+MAX_DISTANCE_THRESHOLD = 1.3  # Valores comuns para L2 no ChromaDB vão de 0.0 (idêntico) até ~2.0. Ajuste se necessário.
+
+def retrieve_docs(query: str, n_results: int = 3) -> str:
+    """
+    Busca documentos no ChromaDB, mas ignora resultados que são muito 
+    diferentes da pergunta original (distância alta).
+    """
+    results = _collection.query(
+        query_texts=[query],
+        n_results=n_results
+    )
+    
+    # Se não retornou nada
+    if not results['documents'] or not results['documents']:
+        return ""
+        
+    valid_docs = []
+    
+    # Itera sobre os resultados e suas respectivas distâncias
+    docs = results['documents']
+    distances = results['distances']
+    
+    for doc, distance in zip(docs, distances):
+        # Só adiciona ao contexto se a distância for MENOR que o limite máximo
+        if distance <= MAX_DISTANCE_THRESHOLD:
+            valid_docs.append(doc)
+        else:
+            # Documento descartado por ser muito distante semanticamente
+            pass
+
+    # Se nenhum documento passou na validação de distância, retorna vazio
+    if not valid_docs:
+        return ""
+        
+    return "\n\n".join(valid_docs)
 
 def _normalize_pn_display(pn: str) -> str:
     """
